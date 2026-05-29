@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PANAS 日本語版 単一HTML版</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #2563eb;
+      --accent-weak: #dbeafe;
+      --success: #065f46;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
+        "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 12px 0;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      margin: 0 0 12px 0;
+    }
+
+    p { margin: 0 0 12px 0; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pill {
+      display: inline-block;
+      background: var(--accent-weak);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      max-width: 320px;
+      font-size: 1rem;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .question {
+      border-top: 1px solid #e5e7eb;
+      padding: 16px 0;
+    }
+
+    .question:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .qtext {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .likert {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(90px, 1fr));
+      gap: 8px;
+    }
+
+    .likert label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      text-align: center;
+      font-weight: 400;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 8px;
+      background: #fff;
+      min-height: 108px;
+      cursor: pointer;
+    }
+
+    .likert input {
+      transform: scale(1.1);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .hidden { display: none; }
+
+    .success {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .footer {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 720px) {
+      .row { grid-template-columns: 1fr; }
+      .likert { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="screen-setup" class="card">
+      <div class="pill">単一HTML版</div>
+      <h1>PANAS 回答プログラム</h1>
+      <p>このプログラムは，PANAS評定用ページです。</p>
+      <div class="row">
+        <div>
+          <label for="participantId">参加者ID</label>
+          <input id="participantId" type="text" placeholder="例: AM001" />
+        </div>
+        <div>
+          <label for="timepoint">測定時点</label>
+          <select id="timepoint">
+            <option value="">選択してください</option>
+            <option value="事前">事前</option>
+            <option value="事後">事後</option>
+          </select>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="startBtn">開始</button>
+      </div>
+    </div>
+
+    <div id="screen-instructions" class="card hidden">
+      <div class="pill">教示</div>
+      <h2>回答方法の説明</h2>
+      <p>以下に状態を表す語がいくつか示されます。<strong>現在のあなたの気分にどれほどあてはまるか</strong>について，それぞれ最も当てはまる番号を選んでください。</p>
+      <div class="card" style="padding:16px; margin:16px 0 0 0; box-shadow:none;">
+        <p>1 = 全く当てはまらない</p>
+        <p>2 = 当てはまらない</p>
+        <p>3 = どちらかといえば当てはまらない</p>
+        <p>4 = どちらかといえば当てはまる</p>
+        <p>5 = 当てはまる</p>
+        <p>6 = 非常によく当てはまる</p>
+      </div>
+      <div class="controls">
+        <button id="toQuestionnaireBtn">回答へ進む</button>
+      </div>
+    </div>
+
+    <div id="screen-form" class="card hidden">
+      <div class="pill">日本語版PANAS 16項目</div>
+      <h2 id="formTitle">回答</h2>
+      <p class="muted">すべての項目に回答してください。</p>
+      <form id="panasForm"></form>
+      <div class="controls">
+        <button id="submitBtn" type="button">回答を保存</button>
+        <button id="resetBtn" type="button" class="secondary">回答をリセット</button>
+      </div>
+      <p id="validationMessage" class="muted"></p>
+    </div>
+
+    <div id="screen-finish" class="card hidden">
+      <div class="pill">完了</div>
+      <h2>回答が終了しました</h2>
+      <p class="success">CSVファイルをダウンロードできる状態です。</p>
+      <div class="summary-grid">
+        <div class="summary-box"><strong>参加者ID</strong><br><span id="summaryParticipant"></span></div>
+        <div class="summary-box"><strong>測定時点</strong><br><span id="summaryTimepoint"></span></div>
+        <div class="summary-box"><strong>PA得点</strong><br><span id="summaryPA"></span></div>
+        <div class="summary-box"><strong>NA得点</strong><br><span id="summaryNA"></span></div>
+      </div>
+      <div class="controls">
+        <button id="downloadBtn">CSVをダウンロード</button>
+        <button id="restartBtn" class="secondary">最初に戻る</button>
+      </div>
+      <div class="footer">
+        参考文献：佐藤 徳・安田 朝子（2001）日本語版PANASの作成．性格心理学研究, 9(2), 138-139.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PANAS_ITEMS = [
+      "びくびくした",
+      "活気のある",
+      "おびえた",
+      "誇らしい",
+      "うろたえた",
+      "心配した",
+      "強気な",
+      "気合いの入った",
+      "ぴりぴりした",
+      "きっぱりとした",
+      "苦悩した",
+      "わくわくした",
+      "機敏な",
+      "熱狂した",
+      "恥じた",
+      "いらだった"
+    ];
+
+    const POSITIVE_ITEMS = new Set([
+      "活気のある",
+      "誇らしい",
+      "強気な",
+      "気合いの入った",
+      "きっぱりとした",
+      "わくわくした",
+      "機敏な",
+      "熱狂した"
+    ]);
+
+    const NEGATIVE_ITEMS = new Set([
+      "びくびくした",
+      "おびえた",
+      "うろたえた",
+      "心配した",
+      "ぴりぴりした",
+      "苦悩した",
+      "恥じた",
+      "いらだった"
+    ]);
+
+    const LABELS = {
+      1: "全く当てはまらない",
+      2: "当てはまらない",
+      3: "どちらかといえば当てはまらない",
+      4: "どちらかといえば当てはまる",
+      5: "当てはまる",
+      6: "非常によく当てはまる"
+    };
+
+    const state = {
+      participantId: "",
+      timepoint: "",
+      startedAt: "",
+      finishedAt: "",
+      responses: {},
+      pa: 0,
+      na: 0
+    };
+
+    const screens = {
+      setup: document.getElementById("screen-setup"),
+      instructions: document.getElementById("screen-instructions"),
+      form: document.getElementById("screen-form"),
+      finish: document.getElementById("screen-finish")
+    };
+
+    function showScreen(name) {
+      Object.values(screens).forEach(el => el.classList.add("hidden"));
+      screens[name].classList.remove("hidden");
+    }
+
+    function escapeCsv(value) {
+      const str = String(value ?? "");
+      if (/[",\n]/.test(str)) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    function buildForm() {
+      const form = document.getElementById("panasForm");
+      form.innerHTML = "";
+      PANAS_ITEMS.forEach((item, index) => {
+        const block = document.createElement("div");
+        block.className = "question";
+        block.innerHTML = `
+          <div class="qtext">${index + 1}. ${item}</div>
+          <div class="likert">
+            ${[1,2,3,4,5,6].map(n => `
+              <label>
+                <input type="radio" name="item_${index}" value="${n}">
+                <span><strong>${n}</strong><br>${LABELS[n]}</span>
+              </label>
+            `).join("")}
+          </div>
+        `;
+        form.appendChild(block);
+      });
+    }
+
+    function validateForm() {
+      for (let i = 0; i < PANAS_ITEMS.length; i++) {
+        const checked = document.querySelector(`input[name="item_${i}"]:checked`);
+        if (!checked) return false;
+      }
+      return true;
+    }
+
+    function collectResponses() {
+      const out = {};
+      PANAS_ITEMS.forEach((item, index) => {
+        const checked = document.querySelector(`input[name="item_${index}"]:checked`);
+        out[item] = Number(checked.value);
+      });
+      return out;
+    }
+
+    function scoreResponses(responses) {
+      let pa = 0;
+      let na = 0;
+      for (const [item, value] of Object.entries(responses)) {
+        if (POSITIVE_ITEMS.has(item)) pa += value;
+        if (NEGATIVE_ITEMS.has(item)) na += value;
+        if (NEGATIVE_ITEMS.has(item)) na += 0;
+      }
+      for (const [item, value] of Object.entries(responses)) {
+        if (NEGATIVE_ITEMS.has(item)) na += value;
+      }
+      return { pa, na };
+    }
+
+    function makeCsv() {
+      const headers = [
+        "participant_id",
+        "timepoint",
+        "started_at",
+        "finished_at",
+        ...PANAS_ITEMS,
+        "pa_score",
+        "na_score"
+      ];
+
+      const row = [
+        state.participantId,
+        state.timepoint,
+        state.startedAt,
+        state.finishedAt,
+        ...PANAS_ITEMS.map(item => state.responses[item]),
+        state.pa,
+        state.na
+      ];
+
+      return headers.map(escapeCsv).join(",") + "\n" + row.map(escapeCsv).join(",") + "\n";
+    }
+
+    function downloadCsv() {
+      const csv = makeCsv();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `${state.participantId}_PANAS_${state.timepoint}_${timestamp}.csv`;
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      const participantId = document.getElementById("participantId").value.trim();
+      const timepoint = document.getElementById("timepoint").value;
+      if (!participantId || !timepoint) {
+        alert("参加者IDと測定時点を入力してください。");
+        return;
+      }
+      state.participantId = participantId;
+      state.timepoint = timepoint;
+      state.startedAt = new Date().toISOString();
+      document.getElementById("formTitle").textContent = `日本語版PANAS（${timepoint}）`;
+      showScreen("instructions");
+    });
+
+    document.getElementById("toQuestionnaireBtn").addEventListener("click", () => {
+      buildForm();
+      showScreen("form");
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const msg = document.getElementById("validationMessage");
+      if (!validateForm()) {
+        msg.textContent = "未回答の項目があります。すべての項目に回答してください。";
+        return;
+      }
+      msg.textContent = "";
+      state.responses = collectResponses();
+      const scores = scoreResponses(state.responses);
+      state.pa = scores.pa;
+      state.na = scores.na;
+      state.finishedAt = new Date().toISOString();
+
+      document.getElementById("summaryParticipant").textContent = state.participantId;
+      document.getElementById("summaryTimepoint").textContent = state.timepoint;
+      document.getElementById("summaryPA").textContent = state.pa;
+      document.getElementById("summaryNA").textContent = state.na;
+      showScreen("finish");
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.getElementById("panasForm").reset();
+      document.getElementById("validationMessage").textContent = "";
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      downloadCsv();
+    });
+
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      state.participantId = "";
+      state.timepoint = "";
+      state.startedAt = "";
+      state.finishedAt = "";
+      state.responses = {};
+      state.pa = 0;
+      state.na = 0;
+      document.getElementById("participantId").value = "";
+      document.getElementById("timepoint").value = "";
+      document.getElementById("panasForm").innerHTML = "";
+      showScreen("setup");
+    });
+  </script>
+</body>
+</html>
