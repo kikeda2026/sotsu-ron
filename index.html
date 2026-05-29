@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>卒業研究プログラム公開ページ</title>
+  <style>
+    :root {
+      --bg: #f7f8fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d7dce5;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hero {
+      background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .container {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .hero-inner { padding: 64px 0 48px; }
+    .badge {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.2;
+      margin: 0 0 16px;
+    }
+    .lead {
+      font-size: 1.08rem;
+      color: var(--muted);
+      max-width: 780px;
+      margin-bottom: 24px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .button.primary {
+      background: var(--accent);
+      color: white;
+    }
+    .button.secondary {
+      background: white;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    section { padding: 36px 0; }
+    .section-title { font-size: 1.5rem; margin: 0 0 8px; }
+    .section-text { color: var(--muted); margin: 0 0 20px; }
+    .grid { display: grid; gap: 20px; }
+    .program-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1.15rem; }
+    .card p { margin: 0 0 14px; color: var(--muted); }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .notice {
+      border-left: 4px solid var(--accent);
+      background: #f8fbff;
+      padding: 16px 18px;
+      border-radius: 12px;
+    }
+    .notice strong { display: block; margin-bottom: 6px; }
+    .steps {
+      display: grid;
+      gap: 14px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 14px;
+      align-items: start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .step-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre {
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+      padding: 24px 0 48px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    @media (max-width: 640px) {
+      .hero-inner { padding: 48px 0 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container hero-inner">
+      <div class="badge">GitHub Pages 用テンプレート</div>
+      <h1>卒業研究プログラム公開ページ</h1>
+      <p class="lead">
+        卒業研究で使用する実験プログラム，尺度回答ページ，関連資料をまとめて公開するためのトップページです。
+        GitHub リポジトリ <code>sotsu-ron</code> にこの <code>index.html</code> を配置すれば，GitHub Pages の公開ページとして利用できます。
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="#programs">公開中のプログラムを見る</a>
+        <a class="button secondary" href="#how-to-publish">GitHub Pages の設定方法</a>
+      </div>
+      <p class="section-text" style="margin-top:16px; margin-bottom:0;">
+        ※ 上の2つのボタンは<strong>別ページに移動するボタンではなく</strong>，このページ内の該当セクションまでスクロールするボタンです。
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="about">
+      <h2 class="section-title">このページについて</h2>
+      <p class="section-text">
+        このページは，心理学系の卒業研究で使用するプログラムや実験資料を整理して公開することを目的としています。
+        研究参加者向けの実験ページと，研究者向けの説明資料を分けて掲載できる構成にしています。
+      </p>
+      <div class="notice">
+        <strong>運用上の注意</strong>
+        参加者が実際にアクセスするページを公開する場合は，個人情報，教示内容，ランダム割り当て情報，内部資料が同じ公開領域に含まれないように注意してください。
+      </div>
+    </section>
+
+    <section id="programs">
+      <h2 class="section-title">公開中のプログラム</h2>
+      <p class="section-text">
+        下のカードに，GitHub Pages 上で公開する各プログラムへのリンクを追加してください。
+        現在はサンプルとして，PANAS 回答ページの枠を入れています。
+      </p>
+
+      <div class="grid program-grid">
+        <article class="card">
+          <div class="meta">
+            <span class="tag">尺度回答</span>
+            <span class="tag">PANAS</span>
+            <span class="tag">単一HTML</span>
+          </div>
+          <h3>PANAS 回答ページ</h3>
+          <p>
+            日本語版PANAS 16項目に回答するためのページです。参加者ID入力，事前・事後選択，PA/NA得点計算，CSVダウンロードに対応しています。
+          </p>
+          <p><strong>公開URL：</strong><br><a href="./panas_pre_post/">./panas_pre_post/</a></p>
+          <p><strong>GitHub Pages上の想定URL：</strong><br><code>https://USERNAME.github.io/sotsu-ron/panas_pre_post/</code></p>
+        </article>
+
+        <article class="card">
+          <div class="meta">
+            <span class="tag">実験課題</span>
+            <span class="tag">自伝的記憶</span>
+            <span class="tag">準備中</span>
+          </div>
+          <h3>自伝的記憶想起課題</h3>
+          <p>
+            手がかり語を提示し，具体的な自伝的記憶を想起させる課題ページを掲載するための枠です。
+          </p>
+          <p><strong>公開URL例：</strong><br><a href="./autobiographical-memory/">./autobiographical-memory/</a></p>
+        </article>
+
+        <article class="card">
+          <div class="meta">
+            <span class="tag">資料</span>
+            <span class="tag">研究者向け</span>
+          </div>
+          <h3>研究資料・説明文書</h3>
+          <p>
+            教示スクリプト，同意説明文書，健康確認シート，RPE提示カードなどの資料を整理して掲載するための枠です。
+          </p>
+          <p><strong>公開URL例：</strong><br><a href="./documents/">./documents/</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section id="repo-structure">
+      <h2 class="section-title">推奨フォルダ構成</h2>
+      <p class="section-text">
+        GitHub Pages で管理しやすいように，プログラムごとにフォルダを分ける構成をおすすめします。
+      </p>
+      <pre><code>sotsu-ron/
+├─ index.html
+├─ panas_pre_post/
+│  └─ index.html
+├─ autobiographical-memory/
+│  └─ index.html
+├─ documents/
+│  ├─ consent.pdf
+│  ├─ health-check.pdf
+│  └─ rpe-card.pdf
+└─ README.md</code></pre>
+    </section>
+
+    <section id="how-to-publish">
+      <h2 class="section-title">GitHub Pages の設定方法</h2>
+      <p class="section-text">
+        次の手順で，GitHub上に公開ページを作成できます。
+      </p>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-number">1</div>
+          <div>
+            <strong>リポジトリ <code>sotsu-ron</code> にファイルを置く</strong>
+            <p>トップ階層にこの <code>index.html</code> を置き，PANASプログラムは <code>panas_pre_post/index.html</code> に配置します。</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-number">2</div>
+          <div>
+            <strong>Settings で GitHub Pages を有効化する</strong>
+            <p><code>Settings → Pages</code> を開き，公開元を <code>Deploy from a branch</code>，ブランチを <code>main</code>，フォルダを <code>/(root)</code> に設定します。</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-number">3</div>
+          <div>
+            <strong>公開URLを確認する</strong>
+            <p>トップページは <code>https://USERNAME.github.io/sotsu-ron/</code>，PANASページは <code>https://USERNAME.github.io/sotsu-ron/panas_pre_post/</code> になります。</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="edit-guide">
+      <h2 class="section-title">このページで編集する箇所</h2>
+      <p class="section-text">
+        実際に運用するときは，次の箇所を研究内容に合わせて編集してください。
+      </p>
+      <div class="grid program-grid">
+        <div class="card">
+          <h3>USERNAME の置き換え</h3>
+          <p><code>https://USERNAME.github.io/...</code> の USERNAME を，ご自身の GitHub ユーザー名に置き換えてください。</p>
+        </div>
+        <div class="card">
+          <h3>各プログラムへのリンク</h3>
+          <p>実際のフォルダ名やファイル名に合わせてリンク先を調整してください。PANASは <code>panas_pre_post</code> に対応済みです。</p>
+        </div>
+        <div class="card">
+          <h3>資料公開の範囲</h3>
+          <p>参加者向けページと，研究者向け内部資料が混在しないように整理します。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      このテンプレートは，卒業研究で使用するプログラム公開のための静的ページとして作成しています。必要に応じて，著作権表示，研究責任者名，問い合わせ先，利用条件などを追記してください。
+    </div>
+  </footer>
+</body>
+</html>
