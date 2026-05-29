@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>日程調整フォーム</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #2563eb;
+      --accent-weak: #dbeafe;
+      --danger: #b91c1c;
+      --success: #065f46;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+    .pill {
+      display: inline-block;
+      background: var(--accent-weak);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 1.9rem; margin: 0 0 12px 0; }
+    h2 { font-size: 1.15rem; margin: 0 0 12px 0; }
+    p { margin: 0 0 12px 0; }
+    .muted { color: var(--muted); }
+    .required { color: var(--danger); font-weight: 700; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      font-size: 1rem;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .section-title {
+      margin-top: 8px;
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .option-group {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .option-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+    .option-card label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .option-card input {
+      transform: scale(1.1);
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .error {
+      color: var(--danger);
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .success {
+      color: var(--success);
+      font-weight: 700;
+    }
+    .hidden { display: none; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .summary-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+    .footer {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="screen-form" class="card">
+      <div class="pill">単一HTML版</div>
+      <h1>実験参加 日程調整フォーム</h1>
+      <p>以下の項目を入力してください。入力内容は、実験参加の日程調整および事前確認のために使用します。</p>
+      <p class="muted"><span class="required">※</span> は必須項目です。</p>
+
+      <div class="grid">
+        <div>
+          <label for="name">氏名 <span class="required">※</span></label>
+          <input id="name" type="text" placeholder="例：池田 花子" />
+        </div>
+        <div>
+          <label for="affiliation">所属・学年 <span class="required">※</span></label>
+          <input id="affiliation" type="text" placeholder="例：心理学科 4年" />
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label for="email">連絡用メールアドレス <span class="required">※</span></label>
+        <input id="email" type="email" placeholder="例：example@university.ac.jp" />
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label for="availability">参加可能日時 <span class="required">※</span></label>
+        <textarea id="availability" placeholder="例：
+6月3日（月） 3限以降
+6月4日（火） 終日可
+6月6日（木） 10:00〜12:00"></textarea>
+        <div class="hint">複数の候補日時を記入してください。</div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div class="section-title">運動実施に関する簡単な事前確認</div>
+
+        <div class="option-group">
+          <div class="option-card">
+            <label>心疾患・呼吸器疾患の有無 <span class="required">※</span></label>
+            <div class="option-group" style="margin-top: 8px;">
+              <label><input type="radio" name="disease" value="なし"> なし</label>
+              <label><input type="radio" name="disease" value="あり"> あり</label>
+            </div>
+          </div>
+
+          <div class="option-card">
+            <label>医師から運動制限を受けていないか <span class="required">※</span></label>
+            <div class="option-group" style="margin-top: 8px;">
+              <label><input type="radio" name="restriction" value="受けていない"> 受けていない</label>
+              <label><input type="radio" name="restriction" value="受けている"> 受けている</label>
+            </div>
+          </div>
+
+          <div class="option-card">
+            <label>当日体調不良時は参加しないことへの同意 <span class="required">※</span></label>
+            <div class="option-group" style="margin-top: 8px;">
+              <label><input type="radio" name="consent_bad_condition" value="同意する"> 同意する</label>
+              <label><input type="radio" name="consent_bad_condition" value="同意しない"> 同意しない</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="submitBtn" type="button">内容を保存</button>
+        <button id="resetBtn" type="button" class="secondary">入力をリセット</button>
+      </div>
+      <p id="validationMessage" class="error"></p>
+    </div>
+
+    <div id="screen-finish" class="card hidden">
+      <div class="pill">完了</div>
+      <h2>入力が完了しました</h2>
+      <p class="success">CSVファイルをダウンロードできます。</p>
+      <div class="summary-grid">
+        <div class="summary-box"><strong>氏名</strong><br><span id="summaryName"></span></div>
+        <div class="summary-box"><strong>所属・学年</strong><br><span id="summaryAffiliation"></span></div>
+        <div class="summary-box"><strong>メールアドレス</strong><br><span id="summaryEmail"></span></div>
+        <div class="summary-box"><strong>事前確認</strong><br><span id="summaryCheck"></span></div>
+      </div>
+      <div class="controls">
+        <button id="downloadBtn">CSVをダウンロード</button>
+        <button id="restartBtn" class="secondary">最初に戻る</button>
+      </div>
+      <div class="footer">
+        このフォームは日程調整と事前確認のための記録用です。必要に応じて，Googleフォーム等に移植してください。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      name: "",
+      affiliation: "",
+      email: "",
+      availability: "",
+      disease: "",
+      restriction: "",
+      consent_bad_condition: "",
+      submittedAt: ""
+    };
+
+    const formScreen = document.getElementById("screen-form");
+    const finishScreen = document.getElementById("screen-finish");
+    const validationMessage = document.getElementById("validationMessage");
+
+    function showFinish() {
+      formScreen.classList.add("hidden");
+      finishScreen.classList.remove("hidden");
+    }
+
+    function showForm() {
+      finishScreen.classList.add("hidden");
+      formScreen.classList.remove("hidden");
+    }
+
+    function getRadioValue(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : "";
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function collectForm() {
+      return {
+        name: document.getElementById("name").value.trim(),
+        affiliation: document.getElementById("affiliation").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        availability: document.getElementById("availability").value.trim(),
+        disease: getRadioValue("disease"),
+        restriction: getRadioValue("restriction"),
+        consent_bad_condition: getRadioValue("consent_bad_condition"),
+        submittedAt: new Date().toISOString()
+      };
+    }
+
+    function validateForm(data) {
+      if (!data.name) return "氏名を入力してください。";
+      if (!data.affiliation) return "所属・学年を入力してください。";
+      if (!data.email) return "連絡用メールアドレスを入力してください。";
+      if (!validateEmail(data.email)) return "メールアドレスの形式を確認してください。";
+      if (!data.availability) return "参加可能日時を入力してください。";
+      if (!data.disease) return "心疾患・呼吸器疾患の有無を選択してください。";
+      if (!data.restriction) return "医師から運動制限を受けていないかを選択してください。";
+      if (!data.consent_bad_condition) return "当日体調不良時は参加しないことへの同意を選択してください。";
+      return "";
+    }
+
+    function escapeCsv(value) {
+      const str = String(value ?? "");
+      if (/[",\n]/.test(str)) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    function makeCsv() {
+      const headers = [
+        "name",
+        "affiliation",
+        "email",
+        "availability",
+        "disease",
+        "restriction",
+        "consent_bad_condition",
+        "submitted_at"
+      ];
+
+      const row = [
+        state.name,
+        state.affiliation,
+        state.email,
+        state.availability,
+        state.disease,
+        state.restriction,
+        state.consent_bad_condition,
+        state.submittedAt
+      ];
+
+      return headers.map(escapeCsv).join(",") + "\n" + row.map(escapeCsv).join(",") + "\n";
+    }
+
+    function downloadCsv() {
+      const csv = makeCsv();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const safeName = state.name ? state.name.replace(/\s+/g, "_") : "schedule_form";
+      const filename = `${safeName}_schedule_${timestamp}.csv`;
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function resetForm() {
+      document.getElementById("name").value = "";
+      document.getElementById("affiliation").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("availability").value = "";
+      document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+      validationMessage.textContent = "";
+      Object.keys(state).forEach(key => state[key] = "");
+      showForm();
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const data = collectForm();
+      const error = validateForm(data);
+      if (error) {
+        validationMessage.textContent = error;
+        return;
+      }
+      validationMessage.textContent = "";
+      Object.assign(state, data);
+      document.getElementById("summaryName").textContent = state.name;
+      document.getElementById("summaryAffiliation").textContent = state.affiliation;
+      document.getElementById("summaryEmail").textContent = state.email;
+      document.getElementById("summaryCheck").textContent = `疾患: ${state.disease} / 運動制限: ${state.restriction} / 同意: ${state.consent_bad_condition}`;
+      showFinish();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      resetForm();
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      downloadCsv();
+    });
+
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      resetForm();
+    });
+  </script>
+</body>
+</html>
