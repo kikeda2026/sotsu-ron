@@ -394,10 +394,6 @@
       for (const [item, value] of Object.entries(responses)) {
         if (POSITIVE_ITEMS.has(item)) pa += value;
         if (NEGATIVE_ITEMS.has(item)) na += value;
-        if (NEGATIVE_ITEMS.has(item)) na += 0;
-      }
-      for (const [item, value] of Object.entries(responses)) {
-        if (NEGATIVE_ITEMS.has(item)) na += value;
       }
       return { pa, na };
     }
