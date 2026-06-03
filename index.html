@@ -1,5 +1,17 @@
+ご提示いただいた「SAS-SV（スマホ依存チェック）」のプログラム情報を追加したHTMLコードを作成しました。
+
+主な変更点は以下の通りです：
+
+1. **「公開中のページ」セクションのリード文調整：** 公開ページ数を「3ページ」から「4ページ」に変更し、「SAS-SV」を追記しました。
+2. **プログラムカードの追加：** `program-grid` 内に、SAS-SVの概要（10項目・2分程度で回答可能）、タグ、リンクボタンを含む新しいカードを追加しました。
+3. **共有用リンク一覧への追加：** ページ下部のリンク一覧にSAS-SVのURLを追記しました。
+
+以下が修正後のHTMLコードです。
+
+```html
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -192,6 +204,7 @@
     }
   </style>
 </head>
+
 <body>
   <header class="hero">
     <div class="container hero-inner">
@@ -222,7 +235,7 @@
     <section id="programs">
       <h2 class="section-title">公開中のページ</h2>
       <p class="section-text">
-        現在，PANAS回答ページ，自伝的記憶テスト，参加者募集フォームの3ページを公開しています。
+        現在，PANAS回答ページ，自伝的記憶テスト，参加者募集フォーム，SAS-SV回答ページの4ページを公開しています。
       </p>
 
       <div class="grid program-grid">
@@ -264,6 +277,19 @@
           <p><strong>URL：</strong><br><a href="https://kikeda2026.github.io/sotsu-ron/demo_recruitment_form.html">https://kikeda2026.github.io/sotsu-ron/demo_recruitment_form.html</a></p>
           <p><a class="button primary" href="https://kikeda2026.github.io/sotsu-ron/demo_recruitment_form.html">参加者募集フォームを開く</a></p>
         </article>
+
+        <article class="card">
+          <div class="meta">
+            <span class="tag">尺度回答</span>
+            <span class="tag">スマホ依存</span>
+          </div>
+          <h3>SAS-SV 回答ページ</h3>
+          <p>
+            スマートフォンへの依存度をチェックする質問項目（SAS-SV）です。全10項目で構成されており、2分程度で簡易的に回答できます。
+          </p>
+          <p><strong>URL：</strong><br><a href="https://kikeda2026.github.io/sotsu-ron/SAS-SV.html">https://kikeda2026.github.io/sotsu-ron/SAS-SV.html</a></p>
+          <p><a class="button primary" href="https://kikeda2026.github.io/sotsu-ron/SAS-SV.html">SAS-SVページを開く</a></p>
+        </article>
       </div>
     </section>
 
@@ -277,6 +303,7 @@
         <p><strong>PANAS</strong><br><code>https://kikeda2026.github.io/sotsu-ron/panas_pre_post.html</code></p>
         <p><strong>自伝的記憶テスト</strong><br><code>https://kikeda2026.github.io/sotsu-ron/AMT.html</code></p>
         <p><strong>参加者募集フォーム</strong><br><code>https://kikeda2026.github.io/sotsu-ron/demo_recruitment_form.html</code></p>
+        <p><strong>SAS-SV（スマホ依存チェック）</strong><br><code>https://kikeda2026.github.io/sotsu-ron/SAS-SV.html</code></p>
       </div>
     </section>
   </main>
@@ -286,5 +313,8 @@
       このトップページは GitHub Pages 上での公開を想定しています。必要に応じて，研究責任者名，所属，問い合わせ先を追記してください。
     </div>
   </footer>
+
 </body>
 </html>
+
+```
