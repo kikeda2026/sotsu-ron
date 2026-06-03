@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートフォン依存度セルフチェック (SAS-SV)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-male: #1f77b4;
+            --accent-female: #e377c2;
+            --bg-color: #f4f6f8;
+            --text-color: #2d3748;
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* 講座用ヘッダーデザイン */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin: 0 0 15px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #718096;
+            margin: 0;
+        }
+
+        /* 回答ガイドボックス */
+        .intro-box {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #2b6cb0;
+            margin-bottom: 35px;
+            font-weight: bold;
+        }
+
+        .intro-box p {
+            margin: 0;
+        }
+
+        /* 性別選択 */
+        .gender-selector {
+            margin-bottom: 25px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .gender-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            position: relative;
+        }
+
+        .gender-btn input[type="radio"] {
+            display: none;
+        }
+
+        .gender-btn label {
+            display: block;
+            padding: 15px;
+            text-align: center;
+            background: #fff;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* ホバー・選択時アクション */
+        .gender-btn:first-child label:hover {
+            border-color: var(--accent-male);
+            color: var(--accent-male);
+        }
+        .gender-btn:last-child label:hover {
+            border-color: var(--accent-female);
+            color: var(--accent-female);
+        }
+
+        .gender-btn input[type="radio"][value="male"]:checked + label {
+            background-color: var(--accent-male);
+            color: #fff;
+            border-color: var(--accent-male);
+            box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
+        }
+
+        .gender-btn input[type="radio"][value="female"]:checked + label {
+            background-color: var(--accent-female);
+            color: #fff;
+            border-color: var(--accent-female);
+            box-shadow: 0 4px 12px rgba(227, 119, 194, 0.3);
+        }
+
+        /* 年齢入力 */
+        .age-selector {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .age-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .age-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .age-input-container input[type="number"] {
+            width: 100px;
+            padding: 12px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-align: center;
+            outline: none;
+            transition: border-color var(--transition-speed);
+            -moz-appearance: textfield; /* Firefoxの標準スピンボタン非表示 */
+        }
+
+        /* Chrome, Safari, Edgeのスピンボタン非表示 */
+        .age-input-container input[type="number"]::-webkit-outer-spin-button,
+        .age-input-container input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .age-input-container input[type="number"]:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .age-unit {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* 質問ブロックのデザイン */
+        .question-block {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .question-block:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+        }
+
+        .option-item input[type="radio"] {
+            display: none;
+        }
+
+        .option-item label {
+            display: block;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 6px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-item label:hover {
+            background: #edf2f7;
+        }
+
+        /* アクティブ時のテーマカラー（JSでクラス制御） */
+        .male-theme input[type="radio"]:checked + label {
+            background: var(--accent-male);
+            color: white;
+            border-color: var(--accent-male);
+        }
+
+        .female-theme input[type="radio"]:checked + label {
+            background: var(--accent-female);
+            color: white;
+            border-color: var(--accent-female);
+        }
+
+        /* 送信ボタン */
+        .submit-container {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            display: inline-block;
+            width: 100%;
+            max-width: 300px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background var(--transition-speed), transform 0.1s;
+        }
+
+        .btn-submit:hover {
+            background: #1a252f;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* 結果セクション */
+        .result-section {
+            display: none;
+            margin-top: 50px;
+            border-top: 3px double #e2e8f0;
+            padding-top: 40px;
+        }
+
+        .result-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .score-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff5f5;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 250px;
+            margin: 0 auto 35px auto;
+            border: 2px solid #fed7d7;
+        }
+
+        .score-num {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #e53e3e;
+            line-height: 1;
+        }
+
+        .score-unit {
+            font-size: 1.2rem;
+            color: #e53e3e;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        /* グラフエリア */
+        .chart-box {
+            position: relative;
+            margin: 40px auto;
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* 免責事項・警告 */
+        .disclaimer-box {
+            margin-top: 40px;
+            background: #fffaf0;
+            border: 1px solid #feebc8;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: #dd6b20;
+        }
+
+        .disclaimer-box h4 {
+            margin: 0 0 8px 0;
+            font-weight: bold;
+        }
+
+        .disclaimer-box p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>スマートフォン依存度セルフチェック</h1>
+        <p class="subtitle">学術基準「SAS-SV」に基づくハッキング度測定</p>
+    </div>
+
+    <!-- 操作説明文 -->
+    <div class="intro-box">
+        <p>
+            各質問の1～10について次の1から6 ofの回答の中から、最もあてはまる番号を1つ選び、クリックしてください。自分に関係のない質問であれば「まったく違う」を選んでください。
+        </p>
+    </div>
+
+    <!-- 入力フォーム -->
+    <form id="sas-form">
+        <!-- 1. 性別選択 -->
+        <div class="gender-selector">
+            <span class="gender-label">1. あなたの性別を選択してください</span>
+            <div class="gender-options">
+                <div class="gender-btn">
+                    <input type="radio" name="gender" id="gender-male" value="male" required>
+                    <label for="gender-male" onclick="setTheme('male')">男子</label>
+                </div>
+                <div class="gender-btn">
+                    <input type="radio" name="gender" id="gender-female" value="female">
+                    <label for="gender-female" onclick="setTheme('female')">女子</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 年齢入力 -->
+        <div class="age-selector">
+            <label for="age-input" class="age-label">2. あなたの年齢を入力してください</label>
+            <div class="age-input-container">
+                <input type="number" name="age" id="age-input" min="5" max="120" placeholder="例: 16" required>
+                <span class="age-unit">歳</span>
+            </div>
+        </div>
+
+        <!-- 質問項目（JSで自動生成） -->
+        <div id="questions-area"></div>
+
+        <!-- 送信ボタン -->
+        <div class="submit-container">
+            <button type="button" class="btn-submit" onclick="processResult()">結果を分析する</button>
+        </div>
+    </form>
+
+    <!-- 結果表示エリア -->
+    <div id="result-area" class="result-section">
+        <div class="result-title">📊 あなたの測定結果 📊</div>
+        
+        <div class="score-box">
+            <span id="display-score" class="score-num">0</span>
+            <span class="score-unit">/ 60 点</span>
+        </div>
+
+        <div style="text-align: center; font-size: 0.95rem; color: #4a5568; margin-bottom: 20px;">
+            <p>※10の質問に対する「1点（全く違う）」〜「6点（とてもそう）」の回答の合計点（10点〜60点）です。</p>
+        </div>
+
+        <!-- 動的SVGチャート描画エリア（100%描画保証） -->
+        <div class="chart-box" id="svg-chart-container">
+            <!-- JSで動的にSVGを流し込みます -->
+        </div>
+
+        <!-- 医療ではない旨の注記 -->
+        <div class="disclaimer-box">
+            <h4>⚠️ 受講者のみなさまへ（セルフチェックに関する重要なお知らせ）</h4>
+            <p>本チェックは、日本の若者データを背景とした館農らの学術研究（2019）の統計結果に基づいて分布を表示する簡易的なセルフチェックツールです。結果はスマートフォン利用を客観的に見直すきっかけを提供するものであり、医療目的の検査・診断に代わるものではありません。日常生活（睡眠、勉強、人間関係）に深刻な不調がある場合は、決して我慢せず、学校の保健室の先生、保護者、専門の医療機関等にご相談ください。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SAS-SV(Smartphone Addiction Scale-Short Version) 日本語用10問
+    const questions = [
+        "スマホの使いすぎで、予定していた勉強（宿題や授業）ができなかったことがある。",
+        "スマホが手元にないと、勉強や授業に集中するのが難しい。",
+        "スマホを使っていると、手首や首のあたりにこりや痛みを感じることがある。",
+        "スマホがないと、いたたまれない、あるいはイライラして落ち着かなくなる。",
+        "スマホを実際に触っていないときでも、スマホのことが頭から離れない。",
+        "「スマホの使用時間を減らそう」と思っても、うまくコントロールできない。",
+        "友達や家族と一緒にいるときでも、ついスマホをチェックしてしまう。",
+        "通知音が鳴ったわけでもないのに、何度も画面を見て確認してしまう。",
+        "親や先生など周囲の人から「スマホばかり見ている」と注意されたことがある。",
+        "スマホの使いすぎのせいで、睡眠不足や生活リズムの乱れを感じる。"
+    ];
+
+    // 選択肢（6件法）
+    const scaleOptions = [
+        { label: "全く違う", score: 1 },
+        { label: "違う", score: 2 },
+        { label: "やや違う", score: 3 },
+        { label: "ややそう", score: 4 },
+        { label: "そうだ", score: 5 },
+        { label: "とてもそう", score: 6 }
+    ];
+
+    // 質問領域を動的に構築
+    const questionsArea = document.getElementById('questions-area');
+    questions.forEach((qText, index) => {
+        const qBlock = document.createElement('div');
+        qBlock.className = 'question-block';
+        qBlock.id = `q-block-${index}`;
+
+        const qTitle = document.createElement('div');
+        qTitle.className = 'question-text';
+        qTitle.innerText = `${index + 3}. ${qText}`; // 性別が「1」、年齢が「2」なので「3」からスタート
+        qBlock.appendChild(qTitle);
+
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+
+        scaleOptions.forEach(opt => {
+            const item = document.createElement('div');
+            item.className = 'option-item';
+
+            const inputId = `q-${index}-opt-${opt.score}`;
+            
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = `q-${index}`;
+            radio.id = inputId;
+            radio.value = opt.score;
+            radio.required = true;
+
+            const label = document.createElement('label');
+            label.htmlFor = inputId;
+            label.innerHTML = `${opt.label}<br><b style="font-size:0.75rem;">${opt.score}点</b>`;
+
+            item.appendChild(radio);
+            item.appendChild(label);
+            grid.appendChild(item);
+        });
+
+        qBlock.appendChild(grid);
+        questionsArea.appendChild(qBlock);
+    });
+
+    // 性別切り替え時に選択肢のテーマカラーを変更する
+    function setTheme(gender) {
+        const blocks = document.querySelectorAll('.question-block');
+        blocks.forEach(block => {
+            if (gender === 'male') {
+                block.classList.add('male-theme');
+                block.classList.remove('female-theme');
+            } else {
+                block.classList.add('female-theme');
+                block.classList.remove('male-theme');
+            }
+        });
+    }
+
+    // 正規分布の確率密度を計算する関数（ガウス分布）
+    function calculateNormalDistribution(x, mean, std) {
+        return (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(std, 2)));
+    }
+
+    // 動的SVGグラフを描画する関数（100%表示保証）
+    function drawSVGChart(score, gender, stats) {
+        const width = 800;
+        const height = 350;
+        const paddingLeft = 60;
+        const paddingRight = 40;
+        const paddingTop = 40;
+        const paddingBottom = 40;
+
+        const graphWidth = width - paddingLeft - paddingRight;
+        const graphHeight = height - paddingTop - paddingBottom;
+
+        // 得点10〜60をSVGのX座標に変換
+        function scaleX(s) {
+            return paddingLeft + ((s - 10) / 50) * graphWidth;
+        }
+
+        // 確率密度(0〜0.045)をSVGのY座標に変換
+        const maxDensity = 0.045;
+        function scaleY(y) {
+            return (height - paddingBottom) - (y / maxDensity) * graphHeight;
+        }
+
+        // --- 1. グリッド線とX軸ラベルの生成 ---
+        let gridHtml = "";
+        for (let s = 10; s <= 60; s += 10) {
+            let xPos = scaleX(s);
+            // 縦のグリッド線
+            gridHtml += `<line x1="${xPos}" y1="${paddingTop}" x2="${xPos}" y2="${height - paddingBottom}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />`;
+            // X軸の目盛り数値
+            gridHtml += `<text x="${xPos}" y="${height - paddingBottom + 20}" fill="#718096" font-size="11" font-weight="bold" text-anchor="middle">${s}</text>`;
+        }
+        // X軸のベースライン
+        gridHtml += `<line x1="${paddingLeft}" y1="${height - paddingBottom}" x2="${width - paddingRight}" y2="${height - paddingBottom}" stroke="#cbd5e0" stroke-width="2" />`;
+
+        // --- 2. 男子・女子のベルカーブ用Pathの生成 ---
+        let malePoints = [];
+        let femalePoints = [];
+        for (let s = 10; s <= 60; s += 0.5) {
+            let xPos = scaleX(s);
+            let yMale = calculateNormalDistribution(s, stats.male.mean, stats.male.std);
+            let yFemale = calculateNormalDistribution(s, stats.female.mean, stats.female.std);
+            malePoints.push(`${xPos.toFixed(1)},${scaleY(yMale).toFixed(1)}`);
+            femalePoints.push(`${xPos.toFixed(1)},${scaleY(yFemale).toFixed(1)}`);
+        }
+        
+        let dMale = `M ${scaleX(10).toFixed(1)},${height - paddingBottom} L ` + malePoints.join(' L ') + ` L ${scaleX(60).toFixed(1)},${height - paddingBottom} Z`;
+        let dFemale = `M ${scaleX(10).toFixed(1)},${height - paddingBottom} L ` + femalePoints.join(' L ') + ` L ${scaleX(60).toFixed(1)},${height - paddingBottom} Z`;
+
+        // --- 3. 男女のカットオフ(ハッキング境界線) ---
+        let cutMaleX = scaleX(stats.male.cutoff);
+        let cutFemaleX = scaleX(stats.female.cutoff);
+
+        // --- 4. あなたの位置プロット ---
+        let userX = scaleX(score);
+        let currentMean = stats[gender].mean;
+        let currentStd = stats[gender].std;
+        let userDensity = calculateNormalDistribution(score, currentMean, currentStd);
+        let userY = scaleY(userDensity);
+
+        const svgHtml = `
+            <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+                <!-- 凡例 (Legend) -->
+                <g transform="translate(${paddingLeft}, 20)">
+                    <rect x="0" y="0" width="12" height="12" rx="3" fill="#1f77b4" />
+                    <text x="18" y="10" font-size="11" fill="#4a5568" font-weight="bold">男子の分布 (平均 24.4)</text>
+
+                    <rect x="180" y="0" width="12" height="12" rx="3" fill="#e377c2" />
+                    <text x="198" y="10" font-size="11" fill="#4a5568" font-weight="bold">女子の分布 (平均 26.8)</text>
+
+                    <circle cx="360" cy="6" r="6" fill="#e53e3e" />
+                    <text x="372" y="10" font-size="11" fill="#e53e3e" font-weight="bold">あなた (${score}点)</text>
+                </g>
+
+                <!-- 確率密度の背景グリッド -->
+                ${gridHtml}
+
+                <!-- 男子の山 (青) -->
+                <path d="${dMale}" fill="rgba(31, 119, 180, 0.08)" stroke="#1f77b4" stroke-width="2.5" />
+
+                <!-- 女子の山 (ピンク) -->
+                <path d="${dFemale}" fill="rgba(227, 119, 194, 0.08)" stroke="#e377c2" stroke-width="2.5" />
+
+                <!-- 男子カットオフ境界線 (青破線) -->
+                <line x1="${cutMaleX}" y1="${paddingTop}" x2="${cutMaleX}" y2="${height - paddingBottom}" stroke="#1f77b4" stroke-width="1.5" stroke-dasharray="4,4" />
+                <text x="${cutMaleX - 6}" y="${paddingTop + 15}" fill="#1f77b4" font-size="10" font-weight="bold" text-anchor="end">男子基準点 (31点)</text>
+
+                <!-- 女子カットオフ境界線 (ピンク破線) -->
+                <line x1="${cutFemaleX}" y1="${paddingTop}" x2="${cutFemaleX}" y2="${height - paddingBottom}" stroke="#e377c2" stroke-width="1.5" stroke-dasharray="4,4" />
+                <text x="${cutFemaleX + 6}" y="${paddingTop + 15}" fill="#e377c2" font-size="10" font-weight="bold" text-anchor="start">女子基準点 (33点)</text>
+
+                <!-- あなたの位置プロット (波紋アニメーション＋赤丸) -->
+                <g>
+                    <!-- 外側の波紋風サークル -->
+                    <circle cx="${userX}" cy="${userY}" r="15" fill="#e53e3e" opacity="0.3">
+                        <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <!-- 中心ドット -->
+                    <circle cx="${userX}" cy="${userY}" r="7" fill="#e53e3e" stroke="#ffffff" stroke-width="2.5" />
+                    
+                    <!-- ピン吹き出し -->
+                    <g transform="translate(${userX}, ${userY - 15})">
+                        <path d="M-40,-25 h80 v20 h-35 l-5,5 l-5,-5 h-35 z" fill="#2c3e50" />
+                        <text x="0" y="-12" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">現在地</text>
+                    </g>
+                </g>
+            </svg>
+        `;
+        document.getElementById('svg-chart-container').innerHTML = svgHtml;
+    }
+
+    // 計算と結果のレンダリング
+    function processResult() {
+        const form = document.getElementById('sas-form');
+        
+        // バリデーションチェック
+        if (!form.checkValidity()) {
+            alert("まだ未回答の項目があります。すべての質問（性別・年齢と10個のチェック）に回答してください。");
+            return;
+        }
+
+        // 入力値取得
+        const gender = form.elements['gender'].value;
+        let score = 0;
+        for (let i = 0; i < questions.length; i++) {
+            score += parseInt(form.elements[`q-${i}`].value);
+        }
+
+        // 画面にスコア反映
+        document.getElementById('display-score').innerText = score;
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = 'block';
+
+        // Tateno et al. (2019) の論文統計データ
+        const stats = {
+            male: { mean: 24.4, std: 10.0, cutoff: 31, label: "男子" },
+            female: { mean: 26.8, std: 9.9, cutoff: 33, label: "女子" }
+        };
+
+        // SVGグラフの描画
+        try {
+            drawSVGChart(score, gender, stats);
+        } catch (e) {
+            console.error("SVG描画エラー:", e);
+        }
+
+        // 結果エリアへ滑らかにスクロール
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
