@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAS-SV ダッシュボード</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", Meiryo, sans-serif;
+      background: #f8f9fa;
+      color: #2d3748;
+      padding: 16px;
+    }
+    h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #718096;
+      margin-bottom: 14px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 4px;
+    }
+    .panel-sub {
+      font-size: 0.72rem;
+      color: #a0aec0;
+      margin-bottom: 12px;
+    }
+    svg text { font-family: inherit; }
+    #status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #718096;
+      padding: 20px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1;
+      min-width: 80px;
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+    }
+    .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #2c3e50;
+    }
+    .stat-label {
+      font-size: 0.68rem;
+      color: #718096;
+      margin-top: 2px;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: #4a5568;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .update-info {
+      font-size: 0.68rem;
+      color: #a0aec0;
+      text-align: right;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ★★ ここをご自身のGAS URLに変更してください ★★ -->
+<script>
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzH42nSQnmdP20vpt-aJtCV5_RQg25tfyhyHvIWiJ85wMW5ONTx-z8-v24Pfa5pp3Xz/exec';
+  const RELOAD_SEC = 5; // 自動更新間隔（秒）
+
+  // 年齢カテゴリ定義
+  function ageGroup(age) {
+    if (age < 12)  return "思春期未満";
+    if (age <= 22) return "青年期";
+    return "成年以上";
+  }
+
+  // ── メイン ──────────────────────────────────────────
+  async function loadAndRender() {
+    document.getElementById('status').textContent = '⏳ データを読み込み中…';
+    try {
+      const res = await fetch(GAS_URL + '?action=getData', { cache: 'no-store' });
+      const raw = await res.json();
+
+      // フィルタリング：数値データが揃っている行のみ
+      const data = raw.filter(d =>
+        (d.gender === 'male' || d.gender === 'female') &&
+        Number.isFinite(+d.age) &&
+        Number.isFinite(+d.total) &&
+        +d.total >= 10 && +d.total <= 60
+      ).map(d => ({
+        gender:   d.gender,
+        age:      +d.age,
+        total:    +d.total,
+        ageGroup: ageGroup(+d.age)
+      }));
+
+      document.getElementById('status').style.display = 'none';
+
+      renderStats(data);
+      renderGenderChart(data);
+      renderAgeScatter(data);
+
+      document.getElementById('updated').textContent =
+        '最終更新: ' + new Date().toLocaleTimeString('ja-JP');
+
+    } catch(e) {
+      document.getElementById('status').textContent =
+        '❌ データ取得に失敗しました。GAS URLを確認してください。';
+    }
+  }
+
+  // ── 要約統計 ────────────────────────────────────────
+  function renderStats(data) {
+    const el = document.getElementById('stats-row');
+    const males   = data.filter(d => d.gender === 'male').map(d => d.total);
+    const females = data.filter(d => d.gender === 'female').map(d => d.total);
+    const mean = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : '–';
+
+    el.innerHTML = [
+      { val: data.length,     label: '総回答数' },
+      { val: males.length,    label: '男子' },
+      { val: females.length,  label: '女子' },
+      { val: mean(data.map(d=>d.total)), label: '全体平均' },
+      { val: mean(males),     label: '男子平均' },
+      { val: mean(females),   label: '女子平均' },
+    ].map(s => `
+      <div class="stat-card">
+        <div class="stat-val">${s.val}</div>
+        <div class="stat-label">${s.label}</div>
+      </div>`).join('');
+  }
+
+  // ── ① 性別：バイオリン + 個別ドット ────────────────
+  function renderGenderChart(data) {
+    const container = document.getElementById('gender-chart');
+    container.innerHTML = '';
+
+    const males   = data.filter(d => d.gender === 'male').map(d => d.total);
+    const females = data.filter(d => d.gender === 'female').map(d => d.total);
+
+    if (males.length + females.length === 0) {
+      container.innerHTML = '<p style="color:#a0aec0;font-size:0.8rem">データなし</p>';
+      return;
+    }
+
+    const W = container.clientWidth || 520;
+    const H = 280;
+    const margin = { top: 20, right: 20, bottom: 35, left: 45 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('width', '100%');
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // スケール
+    const y = d3.scaleLinear().domain([10, 60]).range([innerH, 0]);
+    const groups = ['male', 'female'];
+    const x = d3.scaleBand().domain(groups).range([0, innerW]).padding(0.35);
+    const colors = { male: '#1f77b4', female: '#e377c2' };
+    const labels = { male: '男子', female: '女子' };
+
+    // Y軸
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d => d + '点'))
+      .select('.domain').remove();
+    g.selectAll('.tick line').attr('stroke', '#e2e8f0');
+
+    // グリッド
+    g.selectAll('.grid-line')
+      .data(y.ticks(6))
+      .enter().append('line')
+      .attr('x1', 0).attr('x2', innerW)
+      .attr('y1', d => y(d)).attr('y2', d => y(d))
+      .attr('stroke', '#f0f4f8').attr('stroke-width', 1);
+
+    // カットオフ線
+    const cutoffs = { male: 31, female: 33 };
+
+    // バイオリン描画
+    groups.forEach(grp => {
+      const vals = grp === 'male' ? males : females;
+      if (vals.length < 3) return;
+
+      const bw = x.bandwidth();
+      const cx = x(grp) + bw / 2;
+
+      // KDE
+      const kde = kernelDensityEstimator(kernelEpanechnikov(3), y.ticks(50));
+      const density = kde(vals);
+      const maxD = d3.max(density, d => d[1]);
+      const vWidth = bw * 0.45;
+
+      const area = d3.area()
+        .x0(d => cx - (d[1] / maxD) * vWidth)
+        .x1(d => cx + (d[1] / maxD) * vWidth)
+        .y(d => y(d[0]))
+        .curve(d3.curveCatmullRom);
+
+      g.append('path')
+        .datum(density)
+        .attr('d', area)
+        .attr('fill', colors[grp])
+        .attr('opacity', 0.18);
+
+      g.append('path')
+        .datum(density)
+        .attr('d', d3.line()
+          .x(d => cx + (d[1] / maxD) * vWidth)
+          .y(d => y(d[0]))
+          .curve(d3.curveCatmullRom))
+        .attr('fill', 'none')
+        .attr('stroke', colors[grp])
+        .attr('stroke-width', 1.8)
+        .attr('opacity', 0.7);
+
+      g.append('path')
+        .datum(density)
+        .attr('d', d3.line()
+          .x(d => cx - (d[1] / maxD) * vWidth)
+          .y(d => y(d[0]))
+          .curve(d3.curveCatmullRom))
+        .attr('fill', 'none')
+        .attr('stroke', colors[grp])
+        .attr('stroke-width', 1.8)
+        .attr('opacity', 0.7);
+
+      // ジッタードット
+      const jitter = bw * 0.12;
+      g.selectAll(`.dot-${grp}`)
+        .data(vals)
+        .enter().append('circle')
+        .attr('cx', d => cx + (Math.random() - 0.5) * jitter * 2)
+        .attr('cy', d => y(d))
+        .attr('r', 3)
+        .attr('fill', colors[grp])
+        .attr('opacity', 0.5);
+
+      // 中央線（中央値）
+      const med = d3.median(vals);
+      g.append('line')
+        .attr('x1', cx - bw * 0.25).attr('x2', cx + bw * 0.25)
+        .attr('y1', y(med)).attr('y2', y(med))
+        .attr('stroke', colors[grp]).attr('stroke-width', 2.5);
+
+      // カットオフ
+      g.append('line')
+        .attr('x1', x(grp)).attr('x2', x(grp) + bw)
+        .attr('y1', y(cutoffs[grp])).attr('y2', y(cutoffs[grp]))
+        .attr('stroke', colors[grp]).attr('stroke-width', 1.5)
+        .attr('stroke-dasharray', '4,3').attr('opacity', 0.85);
+
+      g.append('text')
+        .attr('x', x(grp) + bw + 3)
+        .attr('y', y(cutoffs[grp]) + 4)
+        .attr('fill', colors[grp])
+        .attr('font-size', '9px')
+        .text(`基準(${cutoffs[grp]})`);
+
+      // X軸ラベル
+      g.append('text')
+        .attr('x', cx).attr('y', innerH + 25)
+        .attr('text-anchor', 'middle')
+        .attr('fill', colors[grp])
+        .attr('font-size', '12px')
+        .attr('font-weight', 'bold')
+        .text(`${labels[grp]} (n=${vals.length})`);
+    });
+
+    // Y軸タイトル
+    svg.append('text')
+      .attr('transform', `translate(12,${H/2}) rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#718096')
+      .attr('font-size', '10px')
+      .text('SAS-SV 合計得点');
+  }
+
+  // ── ② 年齢：散布図（カテゴリ色分け） ────────────────
+  function renderAgeScatter(data) {
+    const container = document.getElementById('age-chart');
+    container.innerHTML = '';
+
+    if (data.length === 0) {
+      container.innerHTML = '<p style="color:#a0aec0;font-size:0.8rem">データなし</p>';
+      return;
+    }
+
+    const W = container.clientWidth || 520;
+    const H = 280;
+    const margin = { top: 20, right: 20, bottom: 40, left: 45 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('width', '100%');
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const ageGroups = ['思春期未満', '青年期', '成年以上'];
+    const groupColors = {
+      '思春期未満': '#f6ad55',
+      '青年期':     '#68d391',
+      '成年以上':   '#76e4f7'
+    };
+
+    const ageExtent = d3.extent(data, d => d.age);
+    const x = d3.scaleLinear()
+      .domain([Math.max(0, ageExtent[0] - 1), ageExtent[1] + 1])
+      .range([0, innerW]).nice();
+    const y = d3.scaleLinear().domain([10, 60]).range([innerH, 0]);
+
+    // グリッド
+    g.selectAll('.gy').data(y.ticks(6)).enter().append('line')
+      .attr('x1', 0).attr('x2', innerW)
+      .attr('y1', d => y(d)).attr('y2', d => y(d))
+      .attr('stroke', '#f0f4f8').attr('stroke-width', 1);
+
+    // 軸
+    g.append('g')
+      .attr('transform', `translate(0,${innerH})`)
+      .call(d3.axisBottom(x).ticks(6).tickFormat(d => d + '歳'))
+      .select('.domain').remove();
+
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d => d + '点'))
+      .select('.domain').remove();
+
+    // 回帰直線
+    const n = data.length;
+    if (n >= 3) {
+      const mx = d3.mean(data, d => d.age);
+      const my = d3.mean(data, d => d.total);
+      const num = d3.sum(data, d => (d.age - mx) * (d.total - my));
+      const den = d3.sum(data, d => (d.age - mx) ** 2);
+      if (den > 0) {
+        const slope = num / den;
+        const intercept = my - slope * mx;
+        const r = num / Math.sqrt(den * d3.sum(data, d => (d.total - my) ** 2));
+
+        const x0 = x.domain()[0], x1 = x.domain()[1];
+        g.append('line')
+          .attr('x1', x(x0)).attr('x2', x(x1))
+          .attr('y1', y(slope * x0 + intercept))
+          .attr('y2', y(slope * x1 + intercept))
+          .attr('stroke', '#e53e3e')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-dasharray', '5,3')
+          .attr('opacity', 0.7);
+
+        g.append('text')
+          .attr('x', innerW - 5).attr('y', 14)
+          .attr('text-anchor', 'end')
+          .attr('fill', '#e53e3e')
+          .attr('font-size', '10px')
+          .text(`r = ${r.toFixed(2)}`);
+      }
+    }
+
+    // ドット（年齢カテゴリ色）
+    g.selectAll('.dot')
+      .data(data)
+      .enter().append('circle')
+      .attr('cx', d => x(d.age))
+      .attr('cy', d => y(d.total))
+      .attr('r', 5)
+      .attr('fill', d => groupColors[d.ageGroup])
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1)
+      .attr('opacity', 0.8);
+
+    // 軸タイトル
+    svg.append('text')
+      .attr('x', W / 2).attr('y', H - 2)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#718096').attr('font-size', '10px')
+      .text('年齢（歳）');
+
+    svg.append('text')
+      .attr('transform', `translate(12,${H/2}) rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#718096').attr('font-size', '10px')
+      .text('SAS-SV 合計得点');
+
+    // 年齢グループ凡例
+    const legG = g.append('g').attr('transform', `translate(0,-5)`);
+    let lx = 0;
+    ageGroups.forEach(grp => {
+      const cnt = data.filter(d => d.ageGroup === grp).length;
+      legG.append('circle').attr('cx', lx + 5).attr('cy', 0).attr('r', 5)
+        .attr('fill', groupColors[grp]);
+      legG.append('text').attr('x', lx + 14).attr('y', 4)
+        .attr('font-size', '9px').attr('fill', '#4a5568')
+        .text(`${grp}(n=${cnt})`);
+      lx += 90;
+    });
+  }
+
+  // ── KDE ─────────────────────────────────────────────
+  function kernelDensityEstimator(kernel, X) {
+    return function(V) {
+      return X.map(x => [x, d3.mean(V, v => kernel(x - v))]);
+    };
+  }
+  function kernelEpanechnikov(k) {
+    return function(v) {
+      return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+    };
+  }
+
+  // ── 初回 + 自動更新 ──────────────────────────────────
+  loadAndRender();
+  setInterval(loadAndRender, RELOAD_SEC * 1000);
+</script>
+
+<div id="status" style="display:block">⏳ データ読み込み中…</div>
+
+<div class="stats-row" id="stats-row"></div>
+
+<div class="panel">
+  <div class="panel-title">① 性別ごとのSAS-SV得点分布</div>
+  <div class="panel-sub">バイオリンプロット（中央の横線＝中央値 ／ 破線＝スマホ依存基準点）</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#1f77b4"></div>男子</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e377c2"></div>女子</div>
+  </div>
+  <div id="gender-chart"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">② 年齢とSAS-SV得点の関係</div>
+  <div class="panel-sub">散布図（年齢グループで色分け ／ 赤破線＝回帰直線・相関係数r）</div>
+  <div id="age-chart"></div>
+</div>
+
+<div class="update-info" id="updated"></div>
+
+</body>
+</html>
