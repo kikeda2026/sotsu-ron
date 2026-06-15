@@ -97,7 +97,7 @@
 <!-- ★★ ここをご自身のGAS URLに変更してください ★★ -->
 <script>
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbzH42nSQnmdP20vpt-aJtCV5_RQg25tfyhyHvIWiJ85wMW5ONTx-z8-v24Pfa5pp3Xz/exec';
-  const RELOAD_SEC = 5; // 自動更新間隔（秒）
+  const RELOAD_SEC = 30; // 自動更新間隔（秒）
 
   // 年齢カテゴリ定義
   function ageGroup(age) {
@@ -265,7 +265,7 @@
       g.selectAll(`.dot-${grp}`)
         .data(vals)
         .enter().append('circle')
-        .attr('cx', d => cx + (Math.random() - 0.5) * jitter * 2)
+        .attr('cx', (d, i) => cx + ((( i * 2654435761) % 1000) / 1000 - 0.5) * jitter * 2)
         .attr('cy', d => y(d))
         .attr('r', 3)
         .attr('fill', colors[grp])
