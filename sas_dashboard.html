@@ -96,14 +96,14 @@
 
 <!-- ★★ ここをご自身のGAS URLに変更してください ★★ -->
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzH42nSQnmdP20vpt-aJtCV5_RQg25tfyhyHvIWiJ85wMW5ONTx-z8-v24Pfa5pp3Xz/exec';
-  const RELOAD_SEC = 5; // 自動更新間隔（秒）
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbya8P72cPMWe9c1X8rJnSGMmv2HF12bVJAQ6i_x4sPYgEBNh3QfOCKJK4g-8JH91Ln1/exec';
+  const RELOAD_SEC = 30; // 自動更新間隔（秒）
 
   // 年齢カテゴリ定義
   function ageGroup(age) {
-    if (age < 12)  return "思春期未満";
-    if (age <= 22) return "青年期";
-    return "成年以上";
+    if (age <= 14) return "中学生以下";
+    if (age <= 17) return "高校生";
+    return "大学生";
   }
 
   // ── メイン ──────────────────────────────────────────
@@ -334,11 +334,11 @@
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const ageGroups = ['思春期未満', '青年期', '成年以上'];
+    const ageGroups = ['中学生以下', '高校生', '大学生'];
     const groupColors = {
-      '思春期未満': '#f6ad55',
-      '青年期':     '#68d391',
-      '成年以上':   '#76e4f7'
+      '中学生以下': '#f6ad55',
+      '高校生':     '#68d391',
+      '大学生':     '#76e4f7'
     };
 
     const ageExtent = d3.extent(data, d => d.age);
