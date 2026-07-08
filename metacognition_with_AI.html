@@ -184,6 +184,9 @@
 
     const QuestionScreen = ({ questionsPart, startIndex, answers, setAnswers, onNext, isLastPage }) => {
       const isComplete = questionsPart.every(q => answers[q.id] !== undefined);
+      const totalQuestions = 22;
+      const answeredCount = Object.keys(answers).length;
+      const progressPercentage = Math.round((answeredCount / totalQuestions) * 100);
 
       const handleAnswer = (id, value) => {
         setAnswers(prev => ({ ...prev, [id]: value }));
@@ -192,14 +195,14 @@
       return (
         <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-800">質問 ({startIndex + 1} - {startIndex + questionsPart.length} / 22)</h2>
-            <span className="text-sm text-gray-500 font-medium">{Math.round(((startIndex + questionsPart.length) / 22) * 100)}% 完了</span>
+            <h2 className="text-xl font-bold text-gray-800">質問 ({startIndex + 1} - {startIndex + questionsPart.length} / {totalQuestions})</h2>
+            <span className="text-sm text-gray-500 font-medium">{progressPercentage}% 完了</span>
           </div>
           
           <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
             <div 
               className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
-              style={{ width: `${((startIndex + questionsPart.length) / 22) * 100}%` }}
+              style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
 
