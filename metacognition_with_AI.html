@@ -1,0 +1,443 @@
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, AlertCircle, RefreshCcw, CheckCircle2 } from 'lucide-react';
+
+const questions = [
+  { id: 'Q1', text: '私はタスクを完了するのに十分な時間を確保するため、GPTを使って自分の時間を効果的に管理している。', factor: 1 },
+  { id: 'Q2', text: '私は、様々なGPTチャットボットの知的強みを理解している。', factor: 2 },
+  { id: 'Q3', text: 'タスクを始める前に、私はGPTを使用することで本当に学ぶべきことは何かについて考える。', factor: 2 },
+  { id: 'Q4', text: '私は通常、GPTによって提供された情報のうち、どれが重要でどれが重要でないかを特定できる。', factor: 2 },
+  { id: 'Q5', text: '問題を解決する前に、私はGPTによって提案されたものを含むすべての選択肢を検討したか、よく自問する。', factor: 2 },
+  { id: 'Q6', text: '私は通常、タスクの性質に応じて、GPTチャットボットで異なるプロンプト（指示）を使ってみる。', factor: 2 },
+  { id: 'Q7', text: 'GPTの助けを借りてタスクを完了した後、私はそれを達成するためのより簡単な方法があったかどうかを定期的に振り返る。', factor: 2 },
+  { id: 'Q8', text: '私は通常、GPTの助けを借りてどれくらいよく学べるかをコントロールできている。', factor: 2 },
+  { id: 'Q9', text: '私は、その信憑性を理解するために、GPTが提供した情報を定期的に見直す。', factor: 2 },
+  { id: 'Q10', text: '私は頻繁に、GPTを使い始める前に、タスクに関連する質問を自問する。', factor: 2 },
+  { id: 'Q11', text: 'GPTはしばしば、私がタスクを完了するのを助ける動機づけ（モチベーション）として役立っている。', factor: 1 },
+  { id: 'Q12', text: '場合によっては、私はGPTの情報を信頼し、その正確性を検証しないことがある。', factor: 1 },
+  { id: 'Q13', text: 'GPTを使用するとき、私は頻繁に、役立つ学習戦略を自動的に使っていることに気づく。', factor: 2 },
+  { id: 'Q14', text: 'GPTを使用している間、私は自分の理解度を確認するために定期的に立ち止まっている。', factor: 1 },
+  { id: 'Q15', text: '私は、GPTの回答が他の情報源から得られるものよりも詳細で優れていると感じる。', factor: 1 },
+  { id: 'Q16', text: 'GPTの情報を理解できないとき、私は頻繁にやり方を変える。', factor: 2 },
+  { id: 'Q17', text: 'GPTは定期的に、文章をよりよく構成する助けとなり、それによって私の学習をよりよいものにしてくれる。', factor: 1 },
+  { id: 'Q18', text: '通常、私はタスクを始める前に、GPTチャットボットへ慎重に指示を入力する。', factor: 2 },
+  { id: 'Q20', text: '私は通常、目標を達成するために、GPTの助けを借りて時間を効果的に整理している。', factor: 1 },
+  { id: 'Q21', text: 'トピックに興味があるとき、私はGPTの助けを借りてより多くを学ぶ傾向がある。', factor: 1 },
+  { id: 'Q22', text: '私は通常、GPTを使って新しいことを学んでいる間、自分の進捗について自問している。', factor: 1 },
+  { id: 'Q23', text: '通常、混乱したときは、一旦立ち止まってGPTから提供された情報を読み直す。', factor: 2 },
+];
+
+const profiles = [
+  { id: 'master', name: '熟達型', icon: '🏆', desc: '効率化も検証も高いレベルでできている理想的な状態。' },
+  { id: 'efficient', name: '効率重視型', icon: '⚡️', desc: 'GPTを効率的に使えているが、検証プロセスは標準的な状態。' },
+  { id: 'dependent', name: '過剰依存リスク型', icon: '⚠️', desc: '効率化に大きく偏っており、出力を検証せずに鵜呑みにしているリスクがある状態。' },
+  { id: 'cautious', name: '慎重・検証重視型', icon: '🛡️', desc: '検証プロセスは非常に優れているが、タスク効率化の観点ではまだ伸びしろがある状態。' },
+  { id: 'skeptical', name: '懐疑的・手探り型', icon: '🧭', desc: 'AIに対して非常に慎重・懐疑的で、うまく自分のタスク効率化に結びつけられていない状態。' },
+  { id: 'balanced', name: '標準的・バランス型', icon: '⚖️', desc: 'どちらも偏りなく、平均的（標準的）に使えている状態。' },
+  { id: 'developing', name: '開発途上型', icon: '🌱', desc: 'GPTを自分の認知ツールとして使いこなす戦略がまだ確立していない状態。' }
+];
+
+const ConsentScreen = ({ onNext }) => (
+  <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">GPT支援型メタ認知尺度</h2>
+    <div className="prose text-gray-600 mb-8">
+      <p>
+        このアンケートは、ChatGPTなどの生成AI（GPT）を利用する際の、あなたの「メタ認知的気づき（自分の思考や行動を客観的に把握・調整する力）」を測定するものです。
+      </p>
+      <p>
+        回答にかかる時間はおよそ3〜5分です。収集したデータは、個人を特定できない形で今後の研究・分析のために保存・活用させていただきます。
+      </p>
+      <p className="font-medium text-gray-700">
+        以下のボタンを押すことで、調査の目的に同意し、回答データの提供に同意したものとみなされます。
+      </p>
+    </div>
+    <div className="flex justify-end">
+      <button
+        onClick={onNext}
+        className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+      >
+        同意して進む <ChevronRight className="w-5 h-5 ml-2" />
+      </button>
+    </div>
+  </div>
+);
+
+const DemographicScreen = ({ demographics, setDemographics, onNext }) => {
+  const ageNum = parseInt(demographics.age, 10);
+  const isValidAge = demographics.age !== '' && !isNaN(ageNum) && ageNum >= 6 && ageNum <= 120;
+  const isComplete = isValidAge && demographics.gender !== '' && demographics.affiliation !== '' && demographics.aiUsage !== '';
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+      <h2 className="text-xl font-bold text-gray-800 mb-6">基本情報（デモグラフィック属性）</h2>
+      <p className="text-sm text-gray-500 mb-6">結果の分析のため、以下の項目にお答えください。</p>
+
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">年齢</label>
+          <input
+            type="number"
+            min="6"
+            max="120"
+            placeholder="例: 22"
+            value={demographics.age}
+            onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+              demographics.age !== '' && !isValidAge ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}
+          />
+          {demographics.age !== '' && !isValidAge && (
+            <p className="text-red-500 text-sm mt-1 flex items-center">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              6歳から120歳の間で入力してください。
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">性別</label>
+          <select
+            value={demographics.gender}
+            onChange={(e) => setDemographics({ ...demographics, gender: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+          >
+            <option value="">選択してください</option>
+            <option value="male">男性</option>
+            <option value="female">女性</option>
+            <option value="other">その他</option>
+            <option value="no_answer">回答しない</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">所属</label>
+          <select
+            value={demographics.affiliation}
+            onChange={(e) => setDemographics({ ...demographics, affiliation: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+          >
+            <option value="">選択してください</option>
+            <option value="junior_high_school">中学生</option>
+            <option value="high_school">高校生</option>
+            <option value="university">大学生・大学院生</option>
+            <option value="researcher">研究者</option>
+            <option value="teacher">教員</option>
+            <option value="company_employee">会社員・公務員</option>
+            <option value="self_employed">自営業・フリーランス</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">生成AI（GPT）の利用頻度</label>
+          <select
+            value={demographics.aiUsage}
+            onChange={(e) => setDemographics({ ...demographics, aiUsage: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+          >
+            <option value="">選択してください</option>
+            <option value="daily">ほぼ毎日</option>
+            <option value="weekly">週に数回</option>
+            <option value="monthly">月に数回</option>
+            <option value="rarely">ほとんど使わない</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="mt-8 flex justify-end">
+        <button
+          onClick={onNext}
+          disabled={!isComplete}
+          className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+            isComplete ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          次へ進む <ChevronRight className="w-5 h-5 ml-2" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const QuestionScreen = ({ questionsPart, startIndex, answers, setAnswers, onNext, isLastPage }) => {
+  const isComplete = questionsPart.every(q => answers[q.id] !== undefined);
+
+  const handleAnswer = (id, value) => {
+    setAnswers(prev => ({ ...prev, [id]: value }));
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-800">質問 ({startIndex + 1} - {startIndex + questionsPart.length} / 22)</h2>
+        <span className="text-sm text-gray-500 font-medium">{Math.round(((startIndex + questionsPart.length) / 22) * 100)}% 完了</span>
+      </div>
+      
+      <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
+        <div 
+          className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+          style={{ width: `${((startIndex + questionsPart.length) / 22) * 100}%` }}
+        ></div>
+      </div>
+
+      <div className="space-y-6">
+        {questionsPart.map((q, idx) => (
+          <div key={q.id} className="p-5 border border-gray-100 bg-gray-50 rounded-lg hover:shadow-md transition-shadow">
+            <p className="font-medium text-gray-800 mb-4 flex items-start">
+              <span className="text-blue-600 mr-3 mt-0.5">{startIndex + idx + 1}.</span>
+              {q.text}
+            </p>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => handleAnswer(q.id, true)}
+                className={`flex-1 py-3 rounded-lg border-2 font-medium transition-all ${
+                  answers[q.id] === true
+                    ? 'border-blue-600 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+              >
+                当てはまる
+              </button>
+              <button
+                onClick={() => handleAnswer(q.id, false)}
+                className={`flex-1 py-3 rounded-lg border-2 font-medium transition-all ${
+                  answers[q.id] === false
+                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-red-300 hover:bg-red-50'
+                }`}
+              >
+                当てはまらない
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 flex justify-end">
+        <button
+          onClick={onNext}
+          disabled={!isComplete}
+          className={`flex items-center px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
+            isComplete ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          {isLastPage ? '結果を見る' : '次へ進む'}
+          {isLastPage ? <CheckCircle2 className="w-5 h-5 ml-2" /> : <ChevronRight className="w-5 h-5 ml-2" />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const ResultScreen = ({ results, onReset }) => {
+  const { profile, f1Score, f2Score, f1Ratio, f2Ratio } = results;
+
+  const getAdvice = (f1Ratio, f2Ratio) => {
+    if (f1Ratio >= 0.70 && f2Ratio < 0.70) {
+      return "AIの出力に対する批判的な検証（省察プロセス）を少し意識するとさらに良くなります。情報の信憑性を確認するプロセスをルーティンに取り入れてみましょう。";
+    }
+    if (f1Ratio < 0.70 && f2Ratio >= 0.70) {
+      return "GPTをタスクの効率化やモチベーション向上に結びつけることにはまだ慣れていないかもしれません。より積極的・戦略的にタスクを任せてみるのも良いでしょう。";
+    }
+    if (f1Ratio >= 0.70 && f2Ratio >= 0.70) {
+      return "GPTをタスクの効率化に活かしつつ、批判的な検証もできている素晴らしい状態です。引き続き、自分の認知を補助するツールとして有効に活用してください。";
+    }
+    return "まずはGPTを使って自分が行うタスクの一部を任せてみるところから始め、少しずつ検証やプロンプトの工夫を取り入れてみましょう。";
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="p-8 bg-white rounded-xl shadow-sm border border-gray-100 text-center">
+        <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Step 4 / 4</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">診断結果</h2>
+        
+        <div className="inline-block p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 w-full mb-6">
+          <div className="text-6xl mb-4">{profile.icon}</div>
+          <h3 className="text-3xl font-extrabold text-blue-900 mb-3">{profile.name} GPTユーザー</h3>
+          <p className="text-lg text-blue-800 font-medium">{profile.desc}</p>
+        </div>
+
+        <p className="text-gray-700 text-lg">
+          あなたはGPTをタスク遂行や時間管理の強力なツールとして効率的に活用しています。
+        </p>
+      </div>
+
+      <div className="p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+        <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">7つのメタ認知プロファイル</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          {profiles.map(p => (
+            <div 
+              key={p.id} 
+              className={`flex flex-col items-center p-3 rounded-lg border text-center transition-all ${
+                p.id === profile.id 
+                  ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-200 scale-105' 
+                  : 'border-gray-100 bg-gray-50 opacity-50 grayscale'
+              }`}
+            >
+              <span className="text-3xl mb-2">{p.icon}</span>
+              <span className={`text-xs font-bold ${p.id === profile.id ? 'text-blue-800' : 'text-gray-500'}`}>
+                {p.name.split('型')[0]}<br/>型
+              </span>
+              {p.id === profile.id && <span className="mt-2 text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full">あなた</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">因子別スコア詳細</h3>
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="font-medium text-gray-700">Factor 1: 戦略的・動機づけ的関与</span>
+                <span className="font-bold text-blue-600">{f1Score} / 9 ({Math.round(f1Ratio * 100)}%)</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${Math.round(f1Ratio * 100)}%` }}></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">タスク遂行、時間管理、モチベーション維持のためにGPTを効率的に活用する能力。</p>
+            </div>
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="font-medium text-gray-700">Factor 2: メタ認知的調整と省察</span>
+                <span className="font-bold text-emerald-600">{f2Score} / 13 ({Math.round(f2Ratio * 100)}%)</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-emerald-500 h-2.5 rounded-full" style={{ width: `${Math.round(f2Ratio * 100)}%` }}></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">プロンプトの工夫、情報の信憑性確認、理解度のモニタリングなど、批判的かつ柔軟にプロセスを調整する能力。</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 bg-blue-50 rounded-xl shadow-sm border border-blue-100">
+          <h3 className="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">今後のアドバイス</h3>
+          <p className="text-blue-800 leading-relaxed font-medium">
+            {getAdvice(f1Ratio, f2Ratio)}
+          </p>
+        </div>
+      </div>
+
+      <div className="text-center mt-8">
+        <p className="text-sm text-gray-500 mb-6">
+          この結果は自己理解を深めるためのものであり、絶対的な能力を決定づけるものではありません。
+        </p>
+        <button
+          onClick={onReset}
+          className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors font-medium"
+        >
+          <RefreshCcw className="w-4 h-4 mr-2" /> 最初からやり直す
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  const [step, setStep] = useState(0);
+  const [demographics, setDemographics] = useState({ age: '', gender: '', affiliation: '', aiUsage: '' });
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState(null);
+
+  const calculateResults = () => {
+    let f1Score = 0;
+    let f2Score = 0;
+
+    questions.forEach(q => {
+      if (answers[q.id] === true) {
+        if (q.factor === 1) f1Score++;
+        if (q.factor === 2) f2Score++;
+      }
+    });
+
+    const f1Ratio = f1Score / 9;
+    const f2Ratio = f2Score / 13;
+
+    let profile;
+    if (f1Ratio >= 0.70 && f2Ratio >= 0.70) profile = profiles.find(p => p.id === 'master');
+    else if (f1Ratio >= 0.70 && f2Ratio >= 0.40) profile = profiles.find(p => p.id === 'efficient');
+    else if (f1Ratio >= 0.70 && f2Ratio < 0.40) profile = profiles.find(p => p.id === 'dependent');
+    else if (f1Ratio >= 0.40 && f2Ratio >= 0.70) profile = profiles.find(p => p.id === 'cautious');
+    else if (f1Ratio < 0.40 && f2Ratio >= 0.70) profile = profiles.find(p => p.id === 'skeptical');
+    else if (f1Ratio >= 0.40 && f2Ratio >= 0.40) profile = profiles.find(p => p.id === 'balanced');
+    else profile = profiles.find(p => p.id === 'developing');
+
+    return { f1Score, f2Score, f1Ratio, f2Ratio, profile };
+  };
+
+  const submitDataToGAS = async (calculatedResults) => {
+    const url = "https://script.google.com/macros/s/AKfycbwRn9FvH5yNKIgod3Kgwc_PphZGWBSCUtP4Axb82LUOdZ3FfhuVKFAPnMxmcFvCDSiDeg/exec";
+    
+    const payload = {
+      timestamp: new Date().toISOString(),
+      age: demographics.age,
+      gender: demographics.gender,
+      affiliation: demographics.affiliation,
+      aiUsage: demographics.aiUsage,
+      ...answers,
+      factor1Score: calculatedResults.f1Score,
+      factor1Ratio: Math.round(calculatedResults.f1Ratio * 100),
+      factor2Score: calculatedResults.f2Score,
+      factor2Ratio: Math.round(calculatedResults.f2Ratio * 100),
+      profileType: calculatedResults.profile.name
+    };
+
+    try {
+      fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain",
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.error("Data submission error:", error);
+    }
+  };
+
+  const handleNext = () => {
+    window.scrollTo(0, 0);
+    
+    if (step === 3) {
+      const calculatedResults = calculateResults();
+      setResults(calculatedResults);
+      submitDataToGAS(calculatedResults);
+      setStep(4);
+    } else {
+      setStep(step + 1);
+    }
+  };
+
+  const handleReset = () => {
+    setStep(0);
+    setDemographics({ age: '', gender: '', affiliation: '', aiUsage: '' });
+    setAnswers({});
+    setResults(null);
+    window.scrollTo(0, 0);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">GPT-Assisted Metacognition Scale</h1>
+          <p className="text-gray-500 mt-2">生成AI利用時のメタ認知的気づき測定ツール</p>
+        </header>
+
+        <main>
+          {step === 0 && <ConsentScreen onNext={handleNext} />}
+          {step === 1 && <DemographicScreen demographics={demographics} setDemographics={setDemographics} onNext={handleNext} />}
+          {step === 2 && <QuestionScreen questionsPart={questions.slice(0, 11)} startIndex={0} answers={answers} setAnswers={setAnswers} onNext={handleNext} isLastPage={false} />}
+          {step === 3 && <QuestionScreen questionsPart={questions.slice(11, 22)} startIndex={11} answers={answers} setAnswers={setAnswers} onNext={handleNext} isLastPage={true} />}
+          {step === 4 && results && <ResultScreen results={results} onReset={handleReset} />}
+        </main>
+
+        <footer className="mt-16 text-center text-xs text-gray-400">
+          <p>Based on: Varghese, M. A., & Sharma, P. (2026). Measuring human metacognition in GPT-assisted cognition: development and psychometric validation of a novel scale. Frontiers in Psychology, 17, 1823525.</p>
+          <p className="mt-1">This application utilizes the scale items under the Creative Commons Attribution License (CC BY).</p>
+        </footer>
+      </div>
+    </div>
+  );
+}
