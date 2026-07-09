@@ -101,7 +101,7 @@
    設定：ここを自分のGAS Web AppのURLに置き換えてください
    ============================================================ */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwRn9FvH5yNKIgod3Kgwc_PphZGWBSCUtP4Axb82LUOdZ3FfhuVKFAPnMxmcFvCDSiDeg/exec";
-const AUTO_REFRESH_MS = 5000; // 60秒ごとに自動更新（0にすると自動更新オフ）
+const AUTO_REFRESH_MS = 60000; // 60秒ごとに自動更新（0にすると自動更新オフ）
 
 /* ------------------------------------------------------------
    属性定義
@@ -145,6 +145,12 @@ function kernelEpanechnikov(k) {
 }
 function kde(kernel, ticks, values) {
   return ticks.map(t => [t, d3.mean(values, v => kernel(t - v)) || 0]);
+}
+
+/* 再描画のたびに点の位置が変わらないよう、値ベースのシード付き疑似乱数を使う */
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x); // 0〜1の範囲
 }
 
 /* ------------------------------------------------------------
@@ -217,7 +223,7 @@ function drawViolin(svgId, groupData, colorFn, yDomain) {
       .data(g.values)
       .join("circle")
       .attr("class", `jitter-dot dot-${g.key}`)
-      .attr("cx", () => cx + (Math.random() - 0.5) * maxViolinWidth * 0.9)
+      .attr("cx", (d, i) => cx + (seededRandom(i * 12.9898 + d * 78.233) - 0.5) * maxViolinWidth * 0.9)
       .attr("cy", d => y(d))
       .attr("r", 2.3)
       .attr("fill", colorFn(g))
