@@ -39,6 +39,7 @@
   .chart-box h3 { font-size: 13px; font-weight: 600; text-align: center; margin: 0 0 4px 0; color: #334155; }
   .axis text { font-size: 11px; fill: #64748b; }
   .axis path, .axis line { stroke: #cbd5e1; }
+  svg { width: 100%; height: auto; display: block; }
   .violin-path { opacity: 0.55; }
   .jitter-dot { opacity: 0.5; }
   .legend { display: flex; gap: 14px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
@@ -101,7 +102,7 @@
    設定：ここを自分のGAS Web AppのURLに置き換えてください
    ============================================================ */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwRn9FvH5yNKIgod3Kgwc_PphZGWBSCUtP4Axb82LUOdZ3FfhuVKFAPnMxmcFvCDSiDeg/exec";
-const AUTO_REFRESH_MS = 60000; // 60秒ごとに自動更新（0にすると自動更新オフ）
+const AUTO_REFRESH_MS = 50000; // 5秒ごとに自動更新（0にすると自動更新オフ）
 
 /* ------------------------------------------------------------
    属性定義
@@ -161,10 +162,10 @@ function seededRandom(seed) {
 function drawViolin(svgId, groupData, colorFn, yDomain) {
   const svg = d3.select(svgId);
   svg.selectAll("*").remove();
-  const width = svg.node().parentNode.clientWidth || 380;
+  const width = 420;  // 固定の内部座標系（実表示幅はCSSでスケーリング）
   const height = 320;
   const margin = { top: 10, right: 20, bottom: 40, left: 40 };
-  svg.attr("width", width).attr("height", height);
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
 
   const validGroups = groupData.filter(g => g.values.length > 0);
   if (validGroups.length === 0) {
@@ -250,10 +251,10 @@ function drawViolin(svgId, groupData, colorFn, yDomain) {
 function drawScatter(svgId, points, yDomain) {
   const svg = d3.select(svgId);
   svg.selectAll("*").remove();
-  const width = svg.node().parentNode.clientWidth || 380;
+  const width = 420;  // 固定の内部座標系（実表示幅はCSSでスケーリング）
   const height = 320;
   const margin = { top: 10, right: 20, bottom: 40, left: 40 };
-  svg.attr("width", width).attr("height", height);
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
 
   if (points.length === 0) {
     svg.append("text").attr("x", width/2).attr("y", height/2).attr("text-anchor", "middle")
@@ -376,7 +377,6 @@ async function loadAndRender() {
 document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 loadAndRender();
 if (AUTO_REFRESH_MS > 0) setInterval(loadAndRender, AUTO_REFRESH_MS);
-window.addEventListener("resize", () => loadAndRender());
 </script>
 </body>
 </html>
